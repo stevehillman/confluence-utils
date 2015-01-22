@@ -1,0 +1,24 @@
+# Confluence YAML config file
+#
+# Confluence URL
+url: "https://stage.its.sfu.ca/atl-conf"
+
+# Credentials to login with
+username: admin
+password: Password
+
+# Map of Confluence groups that differ from their respective SFU Maillist
+# Format is confluence-group: sfu-maillist
+groupMap: 
+  confluence-administrators: confluence-admins
+  icat: i-cat
+  irmacs: confluence-irmacs
+  iti-users: iti-staff
+  
+
+# Excluded users: users that won't be removed from groups
+# Generally this should be any user that exists in Confluence but not Amaint
+excluded: 
+  - admin
+  - confadmin
+  - automation
