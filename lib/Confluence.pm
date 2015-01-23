@@ -3,7 +3,7 @@
 package Confluence;
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT = qw(Connect getUsers getUser getGroups addUser addGroup addUserToGroup removeUserFromGroup initAllUsersAndGroups getMembers);
+@EXPORT = qw(Connect getUsers getUser getGroups addUser addGroup addUserToGroup removeUserFromGroup initAllUsersAndGroups getMembers existsInConfluence);
 
 use Frontier::Client;
 
@@ -98,8 +98,9 @@ sub addUser
 # Add a user to a group
 sub addUserToGroup
 {
-	my ($group, $member) = @_;
-	addUser($member) if (!$userExists{$member});
+	my ($group, $userHash) = @_;
+	my $member = $userHash->{name};
+	addUser($userHash) if (!$userExists{$member});
 	if (!$readonly) {
 		eval {
 			$Connection->call("confluence2.addUserToGroup",$Auth,$member,$group);
@@ -196,5 +197,11 @@ sub genRandPW
 	my $pw;
 	$pw .= $chars[rand @chars] for 1..20;
 	return $pw;
+}
+
+sub existsInConfluence
+{
+	$user = shift;
+	return $userExists{$user};
 }
 1;

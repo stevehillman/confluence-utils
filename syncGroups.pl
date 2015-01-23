@@ -199,7 +199,21 @@ sub doChanges
 		}
 		else
 		{
-			$result = addUserToGroup($group,$user);
+			if (!existsInConfluence($user))
+			{
+				my $info = info_for_computing_id($user);
+				my ($j1,$j2,$sn,$j3,$gn) = split(/:::/,$info);
+				$userHash = ( name => $user,
+					      fullname => "$gn $sn",
+					      email => "$user\@sfu.ca",
+					      url => ""
+					    );
+			}
+			else
+			{
+				$userHash = ( name => $user );
+			}
+			$result = addUserToGroup($group,$userHash);
 		}
 	}
 	return $result;
