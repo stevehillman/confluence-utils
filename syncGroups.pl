@@ -202,7 +202,8 @@ sub doChanges
 			if (!existsInConfluence($user))
 			{
 				my $info = info_for_computing_id($user);
-				my ($j1,$j2,$sn,$j3,$gn) = split(/:::/,$info);
+				my ($j1,$j2,$sn,$fn,$gn) = split(/:::/,$info);
+				$gn = $fn if ($gn eq "");
 				$userHash = { name => $user,
 					      fullname => "$gn $sn",
 					      email => "$user\@sfu.ca",
