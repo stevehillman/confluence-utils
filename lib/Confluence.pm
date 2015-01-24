@@ -3,7 +3,7 @@
 package Confluence;
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT = qw(Connect getUsers getUser getGroups addUser addGroup addUserToGroup removeUserFromGroup initAllUsersAndGroups getMembers existsInConfluence);
+@EXPORT = qw(Connect getUsers getUser getGroups addUser addGroup addUserToGroup removeUserFromGroup initAllUsersAndGroups getMembers existsInConfluence deactivateUser reactivateUser);
 
 use Frontier::Client;
 
@@ -72,14 +72,112 @@ sub getGroups
 	return @{$Groups};
 }
 
-# Add a user to Confluence
-sub addUser
+# deactivate a user
+sub deactivateUser
 {
 	my $user = shift;
 	if ($readonly)
 	{
-		print STDERR "READ-ONLY mode: Skipping add of user $user\n";
+		print STDERR "READ-ONLY mode: Won't disable  user $user\n";
+		delete($userExists{$user});
+		return 1;
+	}
+
+	my $result;
+	eval {
+		$result = $Connection->call("confluence2.deactivateUser",$Auth,$username);
+	};
+	if ($@)
+	{
+		# We'll get an error if the user doesn't exist OR is already deactivated
+		# so this *may* not be critical. Just log it and return
+		print $@;
+		return undef;
+	}
+
+	delete($userExists{$username});
+	return $result;
+}
+
+# reactivate an existing disabled account
+# Assumes the user already exists and catches an error if not
+sub reactivateUser
+{
+	my $user = shift;
+	if ($readonly)
+	{
+		print STDERR "READ-ONLY mode: Won't re-enable user $user\n";
 		$userExists{$user} = 1;
+		return 1;
+	}
+
+	my $result;
+	eval {
+		$result = $Connection->call("confluence2.reactivateUser",$Auth,$user);
+	};
+	if ($@)
+	{
+		# We'll get an error if the user doesn't exist OR is already active
+		# so this *may* not be critical. Just log it and return
+		print $@;
+		return undef;
+	}
+	return $result;
+}
+
+	
+# check if a user is active. 1=yes, 0=no, undef=doesn't exist
+sub isActiveUser
+{
+	my $user = shift;
+	my $result;
+	eval {
+		$result = $Connection->call("confluence2.isActiveUser",$Auth,$user);
+	};
+	# We get an error if the user doesn't exist, so if no error, they already exist
+	if ($@)
+	{
+		print "isActiveUser: User $user doesn't exist: $@\n" if $debug;
+		return undef;
+	}
+	return $result;
+}
+
+# Add a user to Confluence
+sub addUser
+{
+	my $user = shift;
+	my $username = $user->{name};
+
+	# First check if they're already there but deactivated
+	my $result = isActiveUser($username);
+
+	# We get an undef if the user doesn't exist, so if no error, they already exist
+	if (defined(result))
+	{
+		print "addUser: $username already exists\n" if $debug;
+		if (!$result)
+		{
+			# User isn't active so reactivate
+			if (reactivateUser($username))
+			{
+				print "addUser: Reactivated user $username\n" if $debug;
+				# success, so add to our arrays
+				push (@{$Users},$username);
+				$userExists{$username} = 1;
+				return 1;
+			}
+			# Failed to reactivate user?!
+			print STDERR "Unable to reactivate user $username\n";
+			return undef;
+		}
+		return 0;
+	}
+		
+	if ($readonly)
+	{
+		print STDERR "READ-ONLY mode: Skipping add of user $username\n";
+		$userExists{$username} = 1;
 		return 1;
 	}
 	initAllUsersAndGroups();
@@ -91,8 +189,8 @@ sub addUser
 		print $@;
 		return undef;
 	}
-	push (@{$Users},$user);
-	$userExists{$user} = 1;
+	push (@{$Users},$username);
+	$userExists{$username} = 1;
 }
 
 # Add a user to a group

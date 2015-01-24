@@ -11,7 +11,7 @@ use Rest;	# Amaint REST interace library (via rest.its.sfu.ca)
 use Getopt::Std;
 
 $groupsFile = "/tmp/syncgroups_status_file.tmp";
-$configFile = "/usr/local/etc/confluence-config.yml";
+$configFile = "/opt/amaint/etc/confluence-config.yml";
 $credentials = "/usr/local/credentials/confluence";
 
 getopts('ad:f:hn');
@@ -46,6 +46,7 @@ getopts('ad:f:hn');
 	{
 		syncGroup($group);
 	}
+	disableUsers();
 	saveGroups();
 }
 
@@ -219,6 +220,22 @@ sub doChanges
 	}
 	return $result;
 }	
+
+# If a mandatory group is defined, disable any users who aren't in that group
+sub disableUsers
+{
+	return if (!defined($config->{mandatory_group}));
+
+	my @activeUsers = getMembers($config->{mandatory_group});
+	my @allUsers = getUsers();
+	my ($junk, $drops) = compare_arrays(\@activeUsers,\@allUsers);
+
+	foreach my $u (@{$drops})
+	{
+		print "User $u not in mandatory group. Disabling account\n" if $debug;
+		deactivateUser($u) if (!$noaction);
+	}
+}
 
 # Compare two ararys, passed in as references
 # Returns two array references - one with a list of elements only in array1, and one for array2

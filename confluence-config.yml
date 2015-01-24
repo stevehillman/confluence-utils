@@ -7,6 +7,10 @@ url: "https://stage.its.sfu.ca/atl-conf"
 username: admin
 password: Password
 
+# If defined, mandatory group that users must be a member of. If they're not, 
+# their account gets disabled
+mandatory_group: confluence-users
+
 # Map of Confluence groups that differ from their respective SFU Maillist
 # Format is confluence-group: sfu-maillist
 groupMap: 
