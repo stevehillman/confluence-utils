@@ -225,6 +225,11 @@ sub doChanges
 sub disableUsers
 {
 	return if (!defined($config->{mandatory_group}));
+	if (!$force)
+	{
+		print "Not processing all groups so not processing disabled users\n" if $debug;
+		return;
+	}
 
 	my @activeUsers = getMembers($config->{mandatory_group});
 	my @allUsers = getUsers();
