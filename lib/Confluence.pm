@@ -153,7 +153,7 @@ sub addUser
 	my $result = isActiveUser($username);
 
 	# We get an undef if the user doesn't exist, so if no error, they already exist
-	if (defined(result))
+	if (defined($result))
 	{
 		print "addUser: $username already exists\n" if $debug;
 		if (!$result)
