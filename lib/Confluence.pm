@@ -85,7 +85,7 @@ sub deactivateUser
 
 	my $result;
 	eval {
-		$result = $Connection->call("confluence2.deactivateUser",$Auth,$username);
+		$result = $Connection->call("confluence2.deactivateUser",$Auth,$user);
 	};
 	if ($@)
 	{
@@ -95,7 +95,7 @@ sub deactivateUser
 		return undef;
 	}
 
-	delete($userExists{$username});
+	delete($userExists{$user});
 	return $result;
 }
 
