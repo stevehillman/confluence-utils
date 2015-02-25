@@ -90,7 +90,11 @@ sub deactivateUser
 	if ($@)
 	{
 		# We'll get an error if the user doesn't exist OR is already deactivated
-		# so this *may* not be critical. Just log it and return
+		# so this *may* not matter. Only log it if user doesn't exist
+		if ($@ =~ /User has already been deactivated/)
+		{
+			return 1;
+		}
 		print $@;
 		return undef;
 	}
@@ -118,7 +122,11 @@ sub reactivateUser
 	if ($@)
 	{
 		# We'll get an error if the user doesn't exist OR is already active
-		# so this *may* not be critical. Just log it and return
+		# so this *may* not matter. Only log it if user doesn't exist
+		if ($@ =~ /User is already active/)
+		{
+			return 1;
+		}
 		print $@;
 		return undef;
 	}
