@@ -46,7 +46,7 @@ getopts('ad:f:hn');
 	{
 		syncGroup($group);
 	}
-	disableUsers();
+	disableAndEnableUsers();
 	saveGroups();
 }
 
@@ -221,8 +221,8 @@ sub doChanges
 	return $result;
 }	
 
-# If a mandatory group is defined, disable any users who aren't in that group
-sub disableUsers
+# If a mandatory group is defined, make sure active users agrees with the membership of that group
+sub disableAndEnableUsers
 {
 	return if (!defined($config->{mandatory_group}));
 	if (!$force)
@@ -239,6 +239,12 @@ sub disableUsers
 	{
 		print "User $u not in mandatory group. Disabling account\n" if $debug;
 		deactivateUser($u) if (!$noaction);
+	}
+
+	# Ensure that everyone in the group IS actually active
+	foreach my $u (@activeUsers)
+	{
+		reactivateUser($u);
 	}
 }
 
