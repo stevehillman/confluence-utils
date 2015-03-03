@@ -51,6 +51,14 @@ getopts('ad:f:hn');
 	}
 	disableAndEnableUsers();
 	saveGroups();
+	if (scalar(keys %changes))
+	{
+		print "Users with changes:\n";
+		foreach (keys %changes)
+		{
+			print "$_: $changes{$_}\n";
+		}
+	}
 }
 
 # Load config, my list of groups from last run and login to Confluence
@@ -200,6 +208,7 @@ sub doChanges
 		{
 			next if ($excluded{$user});
 			$result = removeUserFromGroup($group,$user);
+			$changes{$user} .= "-$group,";
 		}
 		else
 		{
@@ -219,6 +228,7 @@ sub doChanges
 				$userHash = { name => $user };
 			}
 			$result = addUserToGroup($group,$userHash);
+			$changes{$user} .= "+$group,";
 		}
 	}
 	return $result;
