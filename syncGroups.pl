@@ -168,7 +168,7 @@ sub syncGroup
 	if (!defined($newMembers))
 	{
 		# Probably a Confluence group that doesn't map to a mail list
-		print STDERR "No such SFU Maillist: $sfu_group. Skipping\n";
+		print "No such SFU Maillist: $sfu_group. Skipping\n" if ($debug);
 		return 0;
 	}
 
@@ -201,7 +201,7 @@ sub doChanges
 {
 	my ($group,$users,$dropping) = @_;
 
-	my $result;
+	my $result = 0;
 	foreach my $user (@{$users})
 	{
 		if ($dropping)
