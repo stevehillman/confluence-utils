@@ -176,10 +176,10 @@ sub syncGroup
 
 	if ($debug)
 	{
-		print "\nCurrent $group members: ",join(",",@oldMembers,"\n");
-		print "Amaint  $group members: ",join(",",@{$newMembers},"\n");
-		print "Adding to group $group: ",join(",",@{$adds}),"\n";
-		print "Removing from group $group: ",join(",",@{$drops}),"\n";
+		print "\nCurrent $group members: ",join(",",sort(@oldMembers),"\n");
+		print "Amaint  $group members: ",join(",",sort(@{$newMembers}),"\n");
+		print "Adding to group $group: ",join(",",sort(@{$adds}),"\n";
+		print "Removing from group $group: ",join(",",sort(@{$drops}),"\n";
 	}
 
 	$r1 = doChanges($group,$adds,0) if (scalar(@{$adds}));
@@ -249,6 +249,7 @@ sub disableAndEnableUsers
 		my @excludedUsers = getMembers($config->{mandatory_excluded_group});
 		foreach (@excludedUsers)
 		{
+			print "Excluded user $_ will be disabled in Confluence\n" if $debug;
 			$mandatoryExcludes{$_} = 1;
 		}
 	}
