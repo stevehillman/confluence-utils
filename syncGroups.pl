@@ -24,7 +24,7 @@ getopts('ad:f:hn');
 	if (defined($opt_h))
 	{
 		print "Usage: syncGroups.pl [-ahn][-d <n>][-f file]\n";
-		print "  -d  <n> run debug level <n>. 1= verbose, 2=packate dumping verbose\n";
+		print "  -d  <n> run debug level <n>. 1= verbose, 2=packet dumping verbose\n";
 		print "  -a  sync all group memberships\n";
 		print "  -f  path to config file (default: $configFile)\n";
 		print "  -h  print this help\n";
@@ -244,7 +244,24 @@ sub disableAndEnableUsers
 		return;
 	}
 
-	my @activeUsers = getMembers($config->{mandatory_group});
+	if (defined($config->{mandatory_excluded_group}))
+	{
+		my @excludedUsers = getMembers($config->{mandatory_excluded_group});
+		foreach (@excludedUsers)
+		{
+			$mandatoryExcludes{$_} = 1;
+		}
+	}
+
+	my @activeUsers = ();
+	my @activeTempUsers = getMembers($config->{mandatory_group});
+	foreach (@activeTempUsers)
+	{
+		if (!defined($mandatoryExcludes{$_}))
+		{
+			push @activeUsers,$_;
+		}
+	}
 	my @allUsers = getUsers();
 	my ($junk, $drops) = compare_arrays(\@activeUsers,\@allUsers);
 

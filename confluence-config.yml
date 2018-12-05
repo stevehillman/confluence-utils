@@ -8,8 +8,10 @@ username: admin
 password: Password
 
 # If defined, mandatory group that users must be a member of. If they're not, 
-# their account gets disabled
+# their account gets disabled. Members of mandatory_excluded_group will be
+# removed from the mandatory_group set before comparing against Confluence
 mandatory_group: confluence-users
+mandatory_excluded_group: confluence-users-exclude
 
 # Map of Confluence groups that differ from their respective SFU Maillist
 # Format is confluence-group: sfu-maillist
