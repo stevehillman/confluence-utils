@@ -170,13 +170,13 @@ sub syncGroup
 	# comparing it against Confluence
 	if ($group eq $config->{mandatory_group} && defined($config->{mandatory_excluded_group}))
 	{
-		my @excludedUsers = getMembers($config->{mandatory_excluded_group});
-		foreach (@excludedUsers)
+		my $excludedUsers = SFU_members_of_maillist($config->{mandatory_excluded_group});
+		foreach (@$excludedUsers)
 		{
 			print "Excluded user $_ will be disabled in Confluence\n" if $debug;
 			$mandatoryExcludes{$_} = 1;
 		}
-		if (scalar(@excludedUsers))
+		if (scalar(@$excludedUsers))
 		{
 			$newMembersTemp = [];
 			foreach (@$newMembers)
