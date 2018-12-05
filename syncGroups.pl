@@ -165,6 +165,31 @@ sub syncGroup
 	my $newMembers = SFU_members_of_maillist($sfu_group);
 	my @oldMembers = getMembers($group);
 
+	# If we're processing the mandatory membership group and an excludes-group has also been
+	# defined, remove the excluded users from the final mandatory membership before
+	# comparing it against Confluence
+	if ($group eq $config->{mandatory_group} && defined($config->{mandatory_excluded_group}))
+	{
+		my @excludedUsers = getMembers($config->{mandatory_excluded_group});
+		foreach (@excludedUsers)
+		{
+			print "Excluded user $_ will be disabled in Confluence\n" if $debug;
+			$mandatoryExcludes{$_} = 1;
+		}
+		if (scalar(@excludedUsers))
+		{
+			$newMembersTemp = [];
+			foreach (@$newMembers)
+			{
+				if (!defined($mandatoryExcludes{$_}))
+				{
+					push @$newMembersTemp,$_;
+				}
+			}
+			$newMembers = $newMembersTemp;
+		}
+	}
+
 	if (!defined($newMembers))
 	{
 		# Probably a Confluence group that doesn't map to a mail list
@@ -244,25 +269,7 @@ sub disableAndEnableUsers
 		return;
 	}
 
-	if (defined($config->{mandatory_excluded_group}))
-	{
-		my @excludedUsers = getMembers($config->{mandatory_excluded_group});
-		foreach (@excludedUsers)
-		{
-			print "Excluded user $_ will be disabled in Confluence\n" if $debug;
-			$mandatoryExcludes{$_} = 1;
-		}
-	}
-
-	my @activeUsers = ();
-	my @activeTempUsers = getMembers($config->{mandatory_group});
-	foreach (@activeTempUsers)
-	{
-		if (!defined($mandatoryExcludes{$_}))
-		{
-			push @activeUsers,$_;
-		}
-	}
+	my @activeUsers = getMembers($config->{mandatory_group});
 	my @allUsers = getUsers();
 	my ($junk, $drops) = compare_arrays(\@activeUsers,\@allUsers);
 
