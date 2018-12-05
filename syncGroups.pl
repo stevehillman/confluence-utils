@@ -176,10 +176,10 @@ sub syncGroup
 
 	if ($debug)
 	{
-		print "\nCurrent $group members: ",join(",",sort(@oldMembers),"\n");
-		print "Amaint  $group members: ",join(",",sort(@{$newMembers}),"\n");
-		print "Adding to group $group: ",join(",",sort(@{$adds}),"\n";
-		print "Removing from group $group: ",join(",",sort(@{$drops}),"\n";
+		print "\nCurrent $group members: ",join(",",sort(@oldMembers)),"\n";
+		print "Amaint  $group members: ",join(",",sort(@{$newMembers})),"\n";
+		print "Adding to group $group: ",join(",",sort(@{$adds})),"\n";
+		print "Removing from group $group: ",join(",",sort(@{$drops})),"\n";
 	}
 
 	$r1 = doChanges($group,$adds,0) if (scalar(@{$adds}));
