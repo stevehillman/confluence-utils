@@ -30,7 +30,7 @@ sub Connect
 	};
 	if ($@)
 	{
-		print $@;
+		_log $@;
 		return undef;
 	}
 	
@@ -43,11 +43,11 @@ sub getUsers
 	if (!defined($Users))
 	{
 		eval {
-			$Users = $Connection->call("confluence2.getActiveUsers",$Auth,Frontier::Client->boolean(1));
+			$Users = $Connection->call("confluence2.getActiveUsers",Frontier::Client->string($Auth),Frontier::Client->boolean(1));
 		};
 		if ($@)
 		{
-			print $@;
+			_log $@;
 			return undef;
 		}
 		foreach my $u (@{$Users}) { $userExists{$u} = 1; }
@@ -61,11 +61,11 @@ sub getGroups
 	if (!defined($Groups))
 	{
 		eval {
-			$Groups = $Connection->call("confluence2.getGroups",$Auth);
+			$Groups = $Connection->call("confluence2.getGroups",Frontier::Client->string($Auth));
 		};
 		if ($@)
 		{
-			print $@;
+			_log $@;
 			return undef;
 		}
 	}
@@ -85,7 +85,7 @@ sub deactivateUser
 
 	my $result;
 	eval {
-		$result = $Connection->call("confluence2.deactivateUser",$Auth,$user);
+		$result = $Connection->call("confluence2.deactivateUser",Frontier::Client->string($Auth),$user);
 	};
 	if ($@)
 	{
@@ -95,7 +95,7 @@ sub deactivateUser
 		{
 			return 1;
 		}
-		print $@;
+		_log $@;
 		return undef;
 	}
 
@@ -117,7 +117,7 @@ sub reactivateUser
 
 	my $result;
 	eval {
-		$result = $Connection->call("confluence2.reactivateUser",$Auth,$user);
+		$result = $Connection->call("confluence2.reactivateUser",Frontier::Client->string($Auth),$user);
 	};
 	if ($@)
 	{
@@ -127,7 +127,7 @@ sub reactivateUser
 		{
 			return 1;
 		}
-		print $@;
+		_log $@;
 		return undef;
 	}
 	return $result;
@@ -140,7 +140,7 @@ sub isActiveUser
 	my $user = shift;
 	my $result;
 	eval {
-		$result = $Connection->call("confluence2.isActiveUser",$Auth,$user);
+		$result = $Connection->call("confluence2.isActiveUser",Frontier::Client->string($Auth),$user);
 	};
 	# We get an error if the user doesn't exist, so if no error, they already exist
 	if ($@)
@@ -190,11 +190,11 @@ sub addUser
 	}
 	initAllUsersAndGroups();
 	eval {
-		$Connection->call("confluence2.addUser",$Auth,$user,genRandPW());
+		$Connection->call("confluence2.addUser",Frontier::Client->string($Auth),$user,genRandPW());
 	};
 	if ($@)
 	{
-		print $@;
+		_log $@;
 		return undef;
 	}
 	push (@{$Users},$username);
@@ -209,11 +209,11 @@ sub addUserToGroup
 	addUser($userHash) if (!$userExists{$member});
 	if (!$readonly) {
 		eval {
-			$Connection->call("confluence2.addUserToGroup",$Auth,$member,$group);
+			$Connection->call("confluence2.addUserToGroup",Frontier::Client->string($Auth),$member,$group);
 		};
 		if ($@)
 		{
-			print $@;
+			_log $@;
 			return undef;
 		}
 	}
@@ -230,11 +230,11 @@ sub removeUserFromGroup
 	if (!$readonly)
 	{
 		eval {
-			$Connection->call("confluence2.removeUserFromGroup",$Auth,$member,$group);
+			$Connection->call("confluence2.removeUserFromGroup",Frontier::Client->string($Auth),$member,$group);
 		};
 		if ($@)
 		{
-			print $@;
+			_log $@;
 			return undef;
 		}
 	}
@@ -274,11 +274,11 @@ sub initAllUsersAndGroups
 		foreach $u (@{$Users})
 		{
 			eval {
-				$u_groups = $Connection->call("confluence2.getUserGroups",$Auth,$u);
+				$u_groups = $Connection->call("confluence2.getUserGroups",Frontier::Client->string($Auth),$u);
 			};
 			if ($@)
 			{
-				print $@;
+				_log $@;
 				return undef;
 			}
 			foreach $ug (@{$u_groups})
@@ -309,5 +309,15 @@ sub existsInConfluence
 {
 	$user = shift;
 	return $userExists{$user};
+}
+
+sub _log
+{
+	my @msgs = @_;
+	my $msg = join("",@msgs);
+	# Squelch common errors from Confluence
+	return if ($msg =~ /no element found/
+		  );
+	print $msg;
 }
 1;
